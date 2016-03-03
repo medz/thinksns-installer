@@ -41,13 +41,13 @@ class NewCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dir     = getcwd() . DIRECTORY_SEPARATOR . $input->getArgument('name');
+        $dir     = $input->getArgument('name');
         $version = $input->getArgument('version');
 
         $dir     = str_replace('/', DIRECTORY_SEPARATOR, $dir);
         $dir     = str_replace('\\', DIRECTORY_SEPARATOR, $dir);
 
-        if (is_dir($dir)) {
+        if (file_exists($dir . '/composer.lock')) {
             throw new RuntimeException('ThinkSNS-4 already exists!');
         }
 
@@ -58,7 +58,8 @@ class NewCommand extends Command
         $commands = array(
             sprintf(
                 '%s create-project %s %s%s --prefer-dist',
-                $composer, 'medz/thinksns-4',
+                $composer,
+                'medz/thinksns-4',
                 $dir,
                 $version
                     ? sprintf(' %s', $version)
@@ -68,7 +69,7 @@ class NewCommand extends Command
 
         mkdir($dir, 0777, true);
 
-        $process = new Process(implode(' && ', $commands), $dir, null, null, null);
+        $process = new Process(implode(' && ', $commands), getcwd(), null, null, null);
 
         $process->run(
             function ($type, $line) use ($output)
